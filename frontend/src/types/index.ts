@@ -162,4 +162,7 @@ export interface DashboardSummary {
   lowest_pillar?: string;
   pending_actions_count: number;
   user_name: string;
+  latest_score?: WellnessScore;
+  latest_anomaly?: boolean;
+  pending_recommendations_count?: number;
 }

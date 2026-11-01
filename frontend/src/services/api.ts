@@ -120,6 +120,7 @@ export const fetchRecommendations = async (params?: {
   category?: string;
   priority?: string;
   is_completed?: boolean;
+  latest_only?: boolean;
 }): Promise<Recommendation[]> => {
   const response = await apiClient.get<Recommendation[]>('/recommendations/', { params });
   return response.data;
