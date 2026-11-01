@@ -7,6 +7,8 @@ import {
   AssessmentDetail,
   AssessmentSummary,
   DashboardSummary,
+  Recommendation,
+  RecommendationSummary,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
@@ -110,6 +112,28 @@ export const deleteAssessment = async (id: number): Promise<{ message: string }>
 // Dashboard
 export const getDashboardSummary = async (): Promise<DashboardSummary> => {
   const response = await apiClient.get<DashboardSummary>('/dashboard/summary');
+  return response.data;
+};
+
+// Recommendations
+export const fetchRecommendations = async (params?: {
+  category?: string;
+  priority?: string;
+  is_completed?: boolean;
+}): Promise<Recommendation[]> => {
+  const response = await apiClient.get<Recommendation[]>('/recommendations/', { params });
+  return response.data;
+};
+
+export const fetchRecommendationSummary = async (): Promise<RecommendationSummary> => {
+  const response = await apiClient.get<RecommendationSummary>('/recommendations/summary');
+  return response.data;
+};
+
+export const toggleRecommendation = async (id: number): Promise<{ id: number; is_completed: boolean; message: string }> => {
+  const response = await apiClient.patch<{ id: number; is_completed: boolean; message: string }>(
+    `/recommendations/${id}/toggle`
+  );
   return response.data;
 };
 

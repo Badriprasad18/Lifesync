@@ -98,9 +98,13 @@ def serialize_assessment_detail(assessment: LifestyleAssessment) -> AssessmentDe
                 category=rec.category,
                 priority=rec.priority,
                 title=rec.title,
+                observation=rec.title,
                 description=rec.description,
+                reason=rec.description,
                 action_item=rec.action_item,
+                suggested_action=rec.action_item,
                 is_completed=rec.is_completed,
+                created_at=rec.created_at,
             )
             for rec in assessment.recommendations
         ],
@@ -151,8 +155,16 @@ def create_assessment(
     db.add(assessment)
     db.flush()
 
-    # Run Scoring & ML Analysis
-    analysis = compute_lifestyle_assessment_results(data)
+    # Fetch prior assessments for longitudinal trend tracking
+    prior_assessments = (
+        db.query(LifestyleAssessment)
+        .filter(LifestyleAssessment.user_id == current_user.id, LifestyleAssessment.id != assessment.id)
+        .order_by(LifestyleAssessment.created_at.desc())
+        .all()
+    )
+
+    # Run Scoring, ML Analysis & Personalized Recommendation Generation
+    analysis = compute_lifestyle_assessment_results(data, previous_assessments=prior_assessments)
 
     score_record = WellnessScore(
         assessment_id=assessment.id,
@@ -227,8 +239,16 @@ def update_assessment(
         if hasattr(assessment, key):
             setattr(assessment, key, value)
 
-    # Recompute scores & analysis
-    analysis = compute_lifestyle_assessment_results(data)
+    # Fetch prior assessments for longitudinal trend tracking
+    prior_assessments = (
+        db.query(LifestyleAssessment)
+        .filter(LifestyleAssessment.user_id == current_user.id, LifestyleAssessment.id != assessment.id)
+        .order_by(LifestyleAssessment.created_at.desc())
+        .all()
+    )
+
+    # Recompute scores & analysis with trend awareness
+    analysis = compute_lifestyle_assessment_results(data, previous_assessments=prior_assessments)
 
     if assessment.wellness_score:
         assessment.wellness_score.composite_lwi = analysis["composite_lwi"]

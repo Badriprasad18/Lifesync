@@ -1,7 +1,7 @@
 """Pydantic Schemas for Lifestyle Assessments, Scores, and ML Results."""
 from datetime import datetime
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 
 
 class AssessmentCreateRequest(BaseModel):
@@ -88,8 +88,22 @@ class RecommendationResponse(BaseModel):
     description: str
     action_item: str
     is_completed: bool
+    created_at: Optional[datetime] = None
+    observation: Optional[str] = None
+    reason: Optional[str] = None
+    suggested_action: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+    @model_validator(mode="after")
+    def populate_aliases(self) -> "RecommendationResponse":
+        if not self.observation:
+            self.observation = self.title
+        if not self.suggested_action:
+            self.suggested_action = self.action_item
+        if not self.reason:
+            self.reason = self.description
+        return self
 
 
 class AssessmentSummaryResponse(BaseModel):

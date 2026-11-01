@@ -153,7 +153,10 @@ def evaluate_habits(data: AssessmentCreateRequest) -> Tuple[float, List[str]]:
     return clamp(score), deductions
 
 
-def compute_lifestyle_assessment_results(data: AssessmentCreateRequest) -> Dict[str, Any]:
+def compute_lifestyle_assessment_results(
+    data: AssessmentCreateRequest,
+    previous_assessments: Optional[List[Any]] = None,
+) -> Dict[str, Any]:
     """
     Main evaluation pipeline:
     1. Computes 6 pillar scores & audit deductions.
@@ -161,7 +164,7 @@ def compute_lifestyle_assessment_results(data: AssessmentCreateRequest) -> Dict[
     3. Categorizes risk tier.
     4. Determines demographic cluster archetype & 2D PCA point.
     5. Evaluates multi-factor anomaly criteria.
-    6. Formulates prioritized action recommendations.
+    6. Formulates personalized action recommendations via recommendation engine.
     """
     sleep_s, sleep_ded = evaluate_sleep(data)
     activity_s, act_ded = evaluate_activity(data)
@@ -197,96 +200,22 @@ def compute_lifestyle_assessment_results(data: AssessmentCreateRequest) -> Dict[
     from app.ml.engine import ml_engine
     ml_insights = ml_engine.analyze_lifestyle_vector(data)
 
-    # Generate Personalized Recommendations
-    recommendations = []
-    pillars = [
-        ("Sleep", sleep_s),
-        ("Physical Activity", activity_s),
-        ("Hydration & Nutrition", nutrition_s),
-        ("Mental Wellbeing", stress_s),
-        ("Digital Hygiene", screen_s),
-        ("Habits", habits_s),
-    ]
-    pillars.sort(key=lambda x: x[1])
-
-    weakest_name, weakest_score = pillars[0]
-    if weakest_name == "Digital Hygiene" or screen_s < 50.0:
-        recommendations.append({
-            "category": "Screen",
-            "priority": "high",
-            "title": "Enforce 60-Minute Digital Sunset",
-            "description": "Late-night screen use suppresses melatonin production, delaying deep restorative sleep.",
-            "action_item": "Switch off laptop and smartphone screens 60 minutes before scheduled bedtime.",
-        })
-    elif weakest_name == "Sleep" or sleep_s < 55.0:
-        recommendations.append({
-            "category": "Sleep",
-            "priority": "high",
-            "title": "Establish Fixed Sleep & Wake Windows",
-            "description": "Circadian rhythm stabilization improves daytime cognitive recall and energy.",
-            "action_item": "Set a non-negotiable bedtime tonight and aim for 7.5 hours of uninterrupted rest.",
-        })
-    elif weakest_name == "Physical Activity" or activity_s < 50.0:
-        recommendations.append({
-            "category": "Activity",
-            "priority": "high",
-            "title": "Implement Hourly Movement Breaks",
-            "description": "Sedentary sitting beyond 8 hours increases muscular stiffness and metabolic lethargy.",
-            "action_item": "Take a 5-minute brisk walk or stretching break for every 50 minutes of sitting.",
-        })
-    elif weakest_name == "Hydration & Nutrition" or nutrition_s < 50.0:
-        recommendations.append({
-            "category": "Hydration",
-            "priority": "high",
-            "title": "Hit Baseline 2.5L Water Target",
-            "description": "Sub-optimal hydration leads to afternoon brain fog, fatigue, and headaches.",
-            "action_item": "Keep a 1L water bottle at your workstation; complete 2 full refills each day.",
-        })
-    elif weakest_name == "Mental Wellbeing" or stress_s < 50.0:
-        recommendations.append({
-            "category": "Stress",
-            "priority": "high",
-            "title": "Box Breathing & Decompression",
-            "description": "Controlled breathing actively dampens sympathetic nervous system arousal.",
-            "action_item": "Practice 4-4-4-4 box breathing for 5 minutes during study or work transitions.",
-        })
-
-    # Secondary Recommendation
-    if data.water_intake_liters < 2.0 and not any(r["category"] == "Hydration" for r in recommendations):
-        recommendations.append({
-            "category": "Hydration",
-            "priority": "medium",
-            "title": "Progressive Hydration Pacing",
-            "description": "Drinking water regularly throughout the day stabilizes metabolic rate.",
-            "action_item": "Drink 1 glass of water immediately upon waking and with every meal.",
-        })
-
-    if data.caffeine_cups > 3:
-        recommendations.append({
-            "category": "Habits",
-            "priority": "medium",
-            "title": "Implement 2 PM Caffeine Curfew",
-            "description": "Caffeine has a 5-7 hour biological half-life that degrades deep sleep architecture.",
-            "action_item": "Avoid coffee, tea, and energy drinks after 2:00 PM.",
-        })
-
-    if data.screen_break_frequency == "rarely":
-        recommendations.append({
-            "category": "Screen",
-            "priority": "medium",
-            "title": "Adopt 20-20-20 Eye Strain Rule",
-            "description": "Continuous near-distance focusing causes ocular muscle strain and dryness.",
-            "action_item": "Every 20 minutes, look at an object 20 feet away for 20 seconds.",
-        })
-
-    if len(recommendations) < 3:
-        recommendations.append({
-            "category": "Activity",
-            "priority": "low",
-            "title": "Daily Step Count Optimization",
-            "description": "Consistent low-intensity walking aids cardiovascular health and posture.",
-            "action_item": "Aim for an extra 1,500 steps today by taking stairs and walking during calls.",
-        })
+    # Generate Personalized Recommendations via Recommendation Engine
+    from app.services.recommendation_engine import recommendation_engine
+    recommendations = recommendation_engine.generate_recommendations(
+        assessment_data=data,
+        wellness_scores={
+            "sleep": sleep_s,
+            "physical_activity": activity_s,
+            "nutrition_hydration": nutrition_s,
+            "mental_wellbeing": stress_s,
+            "digital_hygiene": screen_s,
+            "habits": habits_s,
+            "composite_lwi": composite_lwi,
+        },
+        ml_insights=ml_insights,
+        previous_assessments=previous_assessments,
+    )
 
     return {
         "composite_lwi": composite_lwi,

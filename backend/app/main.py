@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import init_db
-from app.routers import health, auth, assessment, dashboard
+from app.routers import health, auth, assessment, dashboard, recommendations
 
 
 @asynccontextmanager
@@ -38,6 +38,7 @@ app.include_router(health.router, prefix=settings.API_V1_STR)
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(assessment.router, prefix=settings.API_V1_STR)
 app.include_router(dashboard.router, prefix=settings.API_V1_STR)
+app.include_router(recommendations.router, prefix=settings.API_V1_STR)
 
 
 @app.get("/", tags=["Root"])
@@ -53,5 +54,6 @@ async def root():
             "auth": f"{settings.API_V1_STR}/auth",
             "assessment": f"{settings.API_V1_STR}/assessment",
             "dashboard": f"{settings.API_V1_STR}/dashboard",
+            "recommendations": f"{settings.API_V1_STR}/recommendations",
         },
     }

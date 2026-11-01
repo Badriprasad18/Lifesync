@@ -110,11 +110,26 @@ export interface MLInsights {
 export interface Recommendation {
   id: number;
   category: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: 'high' | 'medium' | 'low' | 'positive';
   title: string;
+  observation?: string;
   description: string;
+  reason?: string;
   action_item: string;
+  suggested_action?: string;
   is_completed: boolean;
+  created_at?: string;
+}
+
+export interface RecommendationSummary {
+  total_active: number;
+  completed_count: number;
+  pending_count: number;
+  positive_habits_count: number;
+  by_category: Record<string, number>;
+  by_priority: Record<string, number>;
+  positive_strengths: Recommendation[];
+  actionable_recommendations: Recommendation[];
 }
 
 export interface AssessmentDetail {
