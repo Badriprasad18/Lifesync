@@ -110,11 +110,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const regRes = await registerUser({
           ...demoCredentials,
-          full_name: 'Aditya Sharma (MCA)',
+          full_name: 'Badriprasad Dash',
           age: 23,
           gender: 'male',
-          height_cm: 176.0,
-          weight_kg: 71.5,
+          height_cm: 188.0,
+          weight_kg: 65.0,
           occupation: 'MCA Student',
         });
         setUser(regRes.user);

@@ -18,24 +18,24 @@ export const ProfilePage: React.FC = () => {
   const { user, refreshUser } = useAuth();
   const profile = user?.profile;
 
-  const [fullName, setFullName] = useState(profile?.full_name || 'Aditya Sharma');
+  const [fullName, setFullName] = useState(profile?.full_name || 'Badriprasad Dash');
   const [age, setAge] = useState(profile?.age || 23);
   const [gender, setGender] = useState(profile?.gender || 'male');
   const [occupation, setOccupation] = useState(profile?.occupation || 'MCA Student');
-  const [heightCm, setHeightCm] = useState(profile?.height_cm || 176);
-  const [weightKg, setWeightKg] = useState(profile?.weight_kg || 71.5);
+  const [heightCm, setHeightCm] = useState(profile?.height_cm || 188);
+  const [weightKg, setWeightKg] = useState(profile?.weight_kg || 65);
   const [saving, setSaving] = useState(false);
   const [savedNotification, setSavedNotification] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (user?.profile) {
-      setFullName(user.profile.full_name || '');
+      setFullName(user.profile.full_name || 'Badriprasad Dash');
       setAge(user.profile.age || 23);
       setGender(user.profile.gender || 'male');
-      setOccupation(user.profile.occupation || 'Student');
-      setHeightCm(user.profile.height_cm || 175);
-      setWeightKg(user.profile.weight_kg || 70);
+      setOccupation(user.profile.occupation || 'MCA Student');
+      setHeightCm(user.profile.height_cm || 188);
+      setWeightKg(user.profile.weight_kg || 65);
     }
   }, [user]);
 

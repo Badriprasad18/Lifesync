@@ -35,7 +35,7 @@ export const DEMO_DASHBOARD_SUMMARY: DashboardSummary = {
   is_latest_anomaly: false,
   pending_actions_count: 3,
   pending_recommendations_count: 3,
-  user_name: 'Aditya Sharma',
+  user_name: 'Badriprasad Dash',
 };
 
 export const DEMO_RECOMMENDATIONS: Recommendation[] = [
