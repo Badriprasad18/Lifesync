@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User, UserProfile
-from app.schemas.user import UserRegisterRequest, UserLoginRequest, TokenResponse, UserResponse
+from app.schemas.user import UserRegisterRequest, UserLoginRequest, TokenResponse, UserResponse, UserProfileBase
 from app.utils.security import hash_password, verify_password, create_access_token
 from app.utils.dependencies import get_current_user
 
@@ -85,3 +85,28 @@ def login(credentials: UserLoginRequest, db: Session = Depends(get_db)):
 def get_me(current_user: User = Depends(get_current_user)):
     """Retrieve profile and session details for the currently authenticated user."""
     return current_user
+
+
+@router.put("/profile", response_model=UserResponse)
+def update_profile(
+    profile_data: UserProfileBase,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update profile attributes for authenticated user."""
+    profile = current_user.profile
+    if not profile:
+        profile = UserProfile(user_id=current_user.id)
+        db.add(profile)
+
+    profile.full_name = profile_data.full_name.strip()
+    profile.age = profile_data.age
+    profile.gender = profile_data.gender
+    profile.height_cm = profile_data.height_cm
+    profile.weight_kg = profile_data.weight_kg
+    profile.occupation = profile_data.occupation.strip() if profile_data.occupation else None
+
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+

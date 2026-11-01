@@ -33,7 +33,10 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }
     );
   }
 
-  // Allow seamless access to all features (with demo fallback if unauthenticated)
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
   return children;
 };
 

@@ -15,6 +15,7 @@ import {
   Zap,
   HeartHandshake,
   Layers,
+  Download,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { StatCard } from '../components/common/StatCard';
@@ -25,12 +26,16 @@ import { RecommendationCard } from '../components/common/RecommendationCard';
 import {
   getDashboardSummary,
   listAssessments,
+  getAssessment,
   fetchRecommendations,
   toggleRecommendation,
+  getDashboardTrends,
+  downloadAssessmentPdf,
 } from '../services/api';
 import {
   DashboardSummary,
   AssessmentSummary,
+  AssessmentDetail,
   Recommendation,
 } from '../types';
 import {
@@ -42,21 +47,31 @@ import {
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [latestAssessment, setLatestAssessment] = useState<AssessmentDetail | null>(null);
   const [assessments, setAssessments] = useState<AssessmentSummary[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [trendTimeline, setTrendTimeline] = useState(DEMO_HISTORICAL_TRENDS);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [downloadingPdf, setDownloadingPdf] = useState<boolean>(false);
 
   const loadDashboardData = async () => {
     try {
-      const [sumData, assessData, recsData] = await Promise.allSettled([
+      const [sumData, assessData, recsData, trendsData] = await Promise.allSettled([
         getDashboardSummary(),
         listAssessments(),
         fetchRecommendations({ latest_only: true }),
+        getDashboardTrends(),
       ]);
 
-      if (sumData.status === 'fulfilled' && sumData.value.latest_score) {
+      if (sumData.status === 'fulfilled' && sumData.value) {
         setSummary(sumData.value);
+        if (sumData.value.latest_assessment_id) {
+          try {
+            const detail = await getAssessment(sumData.value.latest_assessment_id);
+            setLatestAssessment(detail);
+          } catch {}
+        }
       } else {
         setSummary(DEMO_DASHBOARD_SUMMARY);
       }
@@ -72,9 +87,27 @@ export const DashboardPage: React.FC = () => {
       } else {
         setRecommendations(DEMO_RECOMMENDATIONS);
       }
+
+      if (trendsData.status === 'fulfilled' && trendsData.value.timeline && trendsData.value.timeline.length > 0) {
+        const mapped = trendsData.value.timeline.map((item, i) => ({
+          assessment_id: item.assessment_id || i + 1,
+          assessed_at: `Log #${item.assessment_id || i + 1}`,
+          score: item.lwi,
+          sleep: item.sleep,
+          activity: item.activity,
+          hydration: item.nutrition,
+          nutrition: item.habits,
+          mental: item.stress,
+          digital: item.screen,
+        }));
+        setTrendTimeline(mapped);
+      } else {
+        setTrendTimeline(DEMO_HISTORICAL_TRENDS);
+      }
     } catch {
       setSummary(DEMO_DASHBOARD_SUMMARY);
       setRecommendations(DEMO_RECOMMENDATIONS);
+      setTrendTimeline(DEMO_HISTORICAL_TRENDS);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -90,6 +123,19 @@ export const DashboardPage: React.FC = () => {
     loadDashboardData();
   };
 
+  const handleDownloadPdf = async () => {
+    const assessId = latestAssessment?.id || summary?.latest_assessment_id;
+    if (!assessId) return;
+    setDownloadingPdf(true);
+    try {
+      await downloadAssessmentPdf(assessId);
+    } catch (err) {
+      console.error('Failed to download PDF report:', err);
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
+
   const handleToggleRec = async (id: number) => {
     try {
       await toggleRecommendation(id);
@@ -102,9 +148,12 @@ export const DashboardPage: React.FC = () => {
   };
 
   const activeSummary = summary || DEMO_DASHBOARD_SUMMARY;
-  const pillars = activeSummary.latest_score?.pillars || DEMO_DASHBOARD_SUMMARY.latest_score!.pillars;
-  const overallScore = activeSummary.latest_score?.composite_lwi || 78.5;
-  const riskTier = activeSummary.latest_score?.risk_tier || 'Optimal';
+  const pillars = latestAssessment?.scores?.pillars || activeSummary.latest_score?.pillars || DEMO_DASHBOARD_SUMMARY.latest_score!.pillars;
+  const overallScore = latestAssessment?.scores?.composite_lwi || activeSummary.latest_lwi || activeSummary.latest_score?.composite_lwi || 78.5;
+  const riskTier = latestAssessment?.scores?.risk_tier || activeSummary.latest_risk_tier || activeSummary.latest_score?.risk_tier || 'Optimal';
+  const latestCluster = latestAssessment?.ml_insights?.cluster_name || activeSummary.latest_cluster || 'Balanced High-Achiever';
+  const isAnomaly = latestAssessment?.ml_insights?.is_anomaly ?? activeSummary.is_latest_anomaly;
+
 
   return (
     <div className="space-y-6">
@@ -133,6 +182,16 @@ export const DashboardPage: React.FC = () => {
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span>Sync</span>
             </button>
+            {(summary?.latest_assessment_id || latestAssessment?.id) && (
+              <button
+                onClick={handleDownloadPdf}
+                disabled={downloadingPdf}
+                className="px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm disabled:opacity-50"
+              >
+                <Download className={`w-4 h-4 text-cyan-500 ${downloadingPdf ? 'animate-spin' : ''}`} />
+                <span>{downloadingPdf ? 'Generating...' : 'PDF Report'}</span>
+              </button>
+            )}
             <NavLink
               to="/assessment"
               className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-xs font-semibold flex items-center gap-2 shadow-sm shadow-cyan-500/25 transition-all transform active:scale-95"
@@ -284,7 +343,7 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           <div className="py-2">
-            <HistoricalTrendChart data={DEMO_HISTORICAL_TRENDS} height={230} />
+            <HistoricalTrendChart data={trendTimeline} height={230} />
           </div>
 
           <p className="text-[11px] text-slate-400 dark:text-slate-500 text-center">

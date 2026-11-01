@@ -12,9 +12,10 @@ import {
   Save,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { updateUserProfile } from '../services/api';
 
 export const ProfilePage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const profile = user?.profile;
 
   const [fullName, setFullName] = useState(profile?.full_name || 'Aditya Sharma');
@@ -23,7 +24,20 @@ export const ProfilePage: React.FC = () => {
   const [occupation, setOccupation] = useState(profile?.occupation || 'MCA Student');
   const [heightCm, setHeightCm] = useState(profile?.height_cm || 176);
   const [weightKg, setWeightKg] = useState(profile?.weight_kg || 71.5);
+  const [saving, setSaving] = useState(false);
   const [savedNotification, setSavedNotification] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (user?.profile) {
+      setFullName(user.profile.full_name || '');
+      setAge(user.profile.age || 23);
+      setGender(user.profile.gender || 'male');
+      setOccupation(user.profile.occupation || 'Student');
+      setHeightCm(user.profile.height_cm || 175);
+      setWeightKg(user.profile.weight_kg || 70);
+    }
+  }, [user]);
 
   // Calculate BMI
   const heightM = heightCm / 100;
@@ -42,11 +56,29 @@ export const ProfilePage: React.FC = () => {
     bmiColor = 'text-rose-500 bg-rose-500/10 border-rose-500/20';
   }
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSavedNotification('Profile preferences updated successfully.');
-    setTimeout(() => setSavedNotification(null), 3000);
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await updateUserProfile({
+        full_name: fullName,
+        age: Number(age),
+        gender,
+        occupation,
+        height_cm: Number(heightCm),
+        weight_kg: Number(weightKg),
+      });
+      await refreshUser();
+      setSavedNotification('Profile preferences updated successfully in database.');
+      setTimeout(() => setSavedNotification(null), 3000);
+    } catch (err: any) {
+      setSaveError(err.response?.data?.detail || 'Failed to update profile.');
+    } finally {
+      setSaving(false);
+    }
   };
+
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -216,13 +248,20 @@ export const ProfilePage: React.FC = () => {
             </div>
           </div>
 
+          {saveError && (
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-semibold">
+              {saveError}
+            </div>
+          )}
+
           <div className="pt-2 flex justify-end">
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 shadow-md shadow-cyan-500/20 flex items-center gap-2"
+              disabled={saving}
+              className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 shadow-md shadow-cyan-500/20 flex items-center gap-2 disabled:opacity-50"
             >
-              <Save className="w-4 h-4" />
-              <span>Save Changes</span>
+              <Save className={`w-4 h-4 ${saving ? 'animate-spin' : ''}`} />
+              <span>{saving ? 'Saving...' : 'Save Changes'}</span>
             </button>
           </div>
         </form>

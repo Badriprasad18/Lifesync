@@ -11,8 +11,9 @@ import {
   RefreshCw,
   CheckCircle2,
   AlertTriangle,
+  Download,
 } from 'lucide-react';
-import { listAssessments, deleteAssessment, getAssessment } from '../services/api';
+import { listAssessments, deleteAssessment, getAssessment, downloadAssessmentPdf } from '../services/api';
 import { AssessmentSummary } from '../types';
 
 export const HistoryPage: React.FC = () => {
@@ -20,6 +21,7 @@ export const HistoryPage: React.FC = () => {
   const [assessments, setAssessments] = useState<AssessmentSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [downloadingPdfId, setDownloadingPdfId] = useState<number | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
 
   const loadHistory = async () => {
@@ -62,6 +64,19 @@ export const HistoryPage: React.FC = () => {
       console.error('Delete failed:', err);
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleDownloadPdf = async (id: number) => {
+    setDownloadingPdfId(id);
+    try {
+      await downloadAssessmentPdf(id);
+      setNotification(`PDF report for Assessment #${id} downloaded.`);
+      setTimeout(() => setNotification(null), 3000);
+    } catch (err) {
+      console.error('Failed to download PDF report:', err);
+    } finally {
+      setDownloadingPdfId(null);
     }
   };
 
@@ -161,6 +176,14 @@ export const HistoryPage: React.FC = () => {
                     </td>
                     <td className="py-4 px-6 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleDownloadPdf(a.id)}
+                          disabled={downloadingPdfId === a.id}
+                          className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-cyan-500 hover:bg-cyan-500/10 transition-colors"
+                          title="Download Official PDF Report"
+                        >
+                          <Download className={`w-4 h-4 ${downloadingPdfId === a.id ? 'animate-spin text-cyan-500' : ''}`} />
+                        </button>
                         <button
                           onClick={() => handleView(a.id)}
                           className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-cyan-500 hover:bg-cyan-500/10 transition-colors"

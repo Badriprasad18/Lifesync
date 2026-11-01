@@ -166,3 +166,39 @@ export interface DashboardSummary {
   latest_anomaly?: boolean;
   pending_recommendations_count?: number;
 }
+
+export interface TrendDataPoint {
+  assessment_id: number;
+  date: string;
+  lwi: number;
+  sleep: number;
+  activity: number;
+  nutrition: number;
+  stress: number;
+  screen: number;
+  habits: number;
+}
+
+export interface DashboardTrends {
+  timeline: TrendDataPoint[];
+  average_lwi: number;
+  highest_lwi: number;
+  lowest_lwi: number;
+  total_points: number;
+}
+
+export interface ClusterBenchmark {
+  cluster_id: number;
+  cluster_name: string;
+  description: string;
+  population_share: string;
+  centroid: {
+    pca_x: number;
+    pca_y: number;
+    sleep_hours: number;
+    exercise_minutes: number;
+    stress_level: number;
+    screen_hours: number;
+  };
+}
+

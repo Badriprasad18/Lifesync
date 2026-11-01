@@ -10,26 +10,35 @@ import {
 } from 'lucide-react';
 import { HistoricalTrendChart } from '../components/common/HistoricalTrendChart';
 import { PillarRadar } from '../components/common/PillarRadar';
-import { apiClient } from '../services/api';
+import { getDashboardTrends } from '../services/api';
+import { DashboardTrends } from '../types';
 import { DEMO_HISTORICAL_TRENDS, DEMO_DASHBOARD_SUMMARY } from '../services/demoData';
 
 export const AnalyticsPage: React.FC = () => {
+  const [trendsSummary, setTrendsSummary] = useState<DashboardTrends | null>(null);
   const [trendData, setTrendData] = useState(DEMO_HISTORICAL_TRENDS);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchTrends = async () => {
       try {
-        const res = await apiClient.get('/dashboard/trends?limit=10');
-        if (res.data && res.data.length > 0) {
-          const mapped = res.data.map((item: any, i: number) => ({
+        const res = await getDashboardTrends();
+        setTrendsSummary(res);
+        if (res && res.timeline && res.timeline.length > 0) {
+          const mapped = res.timeline.map((item, i) => ({
+            assessment_id: item.assessment_id || i + 1,
             assessed_at: `Log #${item.assessment_id || i + 1}`,
-            score: item.composite_lwi,
-            sleep: item.pillars?.sleep,
-            activity: item.pillars?.physical_activity,
-            hydration: item.pillars?.nutrition_hydration,
+            score: item.lwi,
+            sleep: item.sleep,
+            activity: item.activity,
+            hydration: item.nutrition,
+            nutrition: item.habits,
+            mental: item.stress,
+            digital: item.screen,
           }));
           setTrendData(mapped);
+        } else {
+          setTrendData(DEMO_HISTORICAL_TRENDS);
         }
       } catch {
         setTrendData(DEMO_HISTORICAL_TRENDS);
@@ -42,10 +51,11 @@ export const AnalyticsPage: React.FC = () => {
   }, []);
 
   const scores = trendData.map((d) => d.score);
-  const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
-  const maxScore = Math.max(...scores);
-  const minScore = Math.min(...scores);
-  const delta = scores[scores.length - 1] - scores[0];
+  const avgScore = trendsSummary?.average_lwi || (scores.reduce((a, b) => a + b, 0) / (scores.length || 1));
+  const maxScore = trendsSummary?.highest_lwi || Math.max(...scores);
+  const minScore = trendsSummary?.lowest_lwi || Math.min(...scores);
+  const delta = scores.length > 1 ? scores[scores.length - 1] - scores[0] : 0;
+
 
   return (
     <div className="space-y-6">

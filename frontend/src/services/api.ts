@@ -7,6 +7,8 @@ import {
   AssessmentDetail,
   AssessmentSummary,
   DashboardSummary,
+  DashboardTrends,
+  ClusterBenchmark,
   Recommendation,
   RecommendationSummary,
 } from '../types';
@@ -109,13 +111,52 @@ export const deleteAssessment = async (id: number): Promise<{ message: string }>
   return response.data;
 };
 
+export const updateUserProfile = async (profileData: {
+  full_name: string;
+  age: number;
+  gender: string;
+  height_cm?: number;
+  weight_kg?: number;
+  occupation?: string;
+}): Promise<User> => {
+  const response = await apiClient.put<User>('/auth/profile', profileData);
+  return response.data;
+};
+
 // Dashboard
 export const getDashboardSummary = async (): Promise<DashboardSummary> => {
   const response = await apiClient.get<DashboardSummary>('/dashboard/summary');
   return response.data;
 };
 
+export const getDashboardTrends = async (): Promise<DashboardTrends> => {
+  const response = await apiClient.get<DashboardTrends>('/dashboard/trends');
+  return response.data;
+};
+
+export const fetchClusterBenchmarks = async (): Promise<ClusterBenchmark[]> => {
+  const response = await apiClient.get<ClusterBenchmark[]>('/dashboard/clusters');
+  return response.data;
+};
+
+// PDF Report Download
+export const downloadAssessmentPdf = async (id: number): Promise<void> => {
+  const response = await apiClient.get(`/assessment/${id}/pdf`, {
+    responseType: 'blob',
+  });
+  const blob = new Blob([response.data], { type: 'application/pdf' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', `LifeSync_Report_${id}.pdf`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
 // Recommendations
+
 export const fetchRecommendations = async (params?: {
   category?: string;
   priority?: string;

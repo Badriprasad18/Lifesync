@@ -21,21 +21,48 @@ import { PillarRadar } from '../components/common/PillarRadar';
 import { RecommendationCard } from '../components/common/RecommendationCard';
 import { AssessmentDetail } from '../types';
 import { DEMO_ASSESSMENT_DETAIL } from '../services/demoData';
+import { downloadAssessmentPdf, listAssessments, getAssessment } from '../services/api';
 
 export const AssessmentResultsPage: React.FC = () => {
   const [assessment, setAssessment] = useState<AssessmentDetail>(DEMO_ASSESSMENT_DETAIL);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [pdfSuccess, setPdfSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if session storage has the fresh assessment result
-    const stored = sessionStorage.getItem('lifesync_latest_assessment');
-    if (stored) {
+    const loadResult = async () => {
+      const stored = sessionStorage.getItem('lifesync_latest_assessment');
+      if (stored) {
+        try {
+          setAssessment(JSON.parse(stored));
+          return;
+        } catch {}
+      }
       try {
-        setAssessment(JSON.parse(stored));
+        const summaries = await listAssessments();
+        if (summaries && summaries.length > 0) {
+          const detail = await getAssessment(summaries[0].id);
+          setAssessment(detail);
+        }
       } catch {
         setAssessment(DEMO_ASSESSMENT_DETAIL);
       }
-    }
+    };
+    loadResult();
   }, []);
+
+  const handleDownloadPdf = async () => {
+    if (!assessment?.id) return;
+    setDownloadingPdf(true);
+    try {
+      await downloadAssessmentPdf(assessment.id);
+      setPdfSuccess('PDF report downloaded successfully.');
+      setTimeout(() => setPdfSuccess(null), 3500);
+    } catch (err) {
+      console.error('Failed to download PDF report:', err);
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
 
   const score = assessment.scores?.composite_lwi || 78.5;
   const riskTier = assessment.scores?.risk_tier || 'Optimal';
@@ -62,13 +89,21 @@ export const AssessmentResultsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={handleDownloadPdf}
+            disabled={downloadingPdf}
+            className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 shadow-sm transition-all disabled:opacity-50"
+          >
+            <Download className={`w-4 h-4 text-cyan-500 ${downloadingPdf ? 'animate-spin' : ''}`} />
+            <span>{downloadingPdf ? 'Generating PDF...' : 'Download PDF Report'}</span>
+          </button>
           <NavLink
             to="/ai-analysis"
             className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2"
           >
             <BrainCircuit className="w-4 h-4 text-violet-500" />
-            <span>AI Cluster Analysis</span>
+            <span>AI Cluster</span>
           </NavLink>
           <NavLink
             to="/recommendations"
@@ -79,6 +114,14 @@ export const AssessmentResultsPage: React.FC = () => {
           </NavLink>
         </div>
       </div>
+
+      {pdfSuccess && (
+        <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          <span>{pdfSuccess}</span>
+        </div>
+      )}
+
 
       {/* Main Score & Radar Hero Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

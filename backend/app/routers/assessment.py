@@ -1,7 +1,10 @@
 """Assessment Management Router (Intake, Scoring, Editing, and Retrieval)."""
 import json
+import io
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
+from app.services.pdf_service import generate_lifestyle_pdf_report
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
@@ -368,3 +371,54 @@ def get_assessment(
         )
 
     return serialize_assessment_detail(assessment)
+
+
+@router.get("/{assessment_id}/pdf")
+def download_assessment_pdf(
+    assessment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Generate and stream a professional lifestyle wellness evaluation PDF report."""
+    assessment = (
+        db.query(LifestyleAssessment)
+        .filter(LifestyleAssessment.id == assessment_id)
+        .first()
+    )
+
+    if not assessment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Assessment #{assessment_id} was not found.",
+        )
+
+    if assessment.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to view this assessment report.",
+        )
+
+    detail = serialize_assessment_detail(assessment)
+    detail_dict = detail.model_dump()
+
+    profile_dict = {}
+    if current_user.profile:
+        profile_dict = {
+            "full_name": current_user.profile.full_name,
+            "age": current_user.profile.age,
+            "gender": current_user.profile.gender,
+            "height_cm": current_user.profile.height_cm,
+            "weight_kg": current_user.profile.weight_kg,
+            "occupation": current_user.profile.occupation,
+        }
+
+    pdf_bytes = generate_lifestyle_pdf_report(detail_dict, profile_dict)
+
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=LifeSync_Report_{assessment_id}.pdf"
+        },
+    )
+

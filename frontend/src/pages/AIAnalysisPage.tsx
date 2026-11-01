@@ -11,7 +11,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { PCAScatterPlot } from '../components/common/PCAScatterPlot';
-import { apiClient } from '../services/api';
+import { apiClient, listAssessments, getAssessment } from '../services/api';
 import { DEMO_PCA_CLUSTERS, DEMO_ASSESSMENT_DETAIL } from '../services/demoData';
 
 export const AIAnalysisPage: React.FC = () => {
@@ -45,22 +45,37 @@ export const AIAnalysisPage: React.FC = () => {
 
     fetchClusters();
 
-    // Check session storage for latest assessment ML insights
-    const stored = sessionStorage.getItem('lifesync_latest_assessment');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed.ml_insights) {
-          setUserCoords(parsed.ml_insights.pca_coordinates || { x: 2.85, y: 0.42 });
-          setActiveArchetype(parsed.ml_insights.cluster_name || 'Balanced High-Achiever');
-          setIsAnomaly(parsed.ml_insights.is_anomaly || false);
-          setAnomalyScore(parsed.ml_insights.anomaly_score || 0.18);
-          setAnomalyFactors(parsed.ml_insights.anomaly_contributing_factors || []);
-        }
-      } catch {
-        // use defaults
+    const loadAssessmentInsights = async () => {
+      const stored = sessionStorage.getItem('lifesync_latest_assessment');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.ml_insights) {
+            setUserCoords(parsed.ml_insights.pca_coordinates || { x: 2.85, y: 0.42 });
+            setActiveArchetype(parsed.ml_insights.cluster_name || 'Balanced High-Achiever');
+            setIsAnomaly(parsed.ml_insights.is_anomaly || false);
+            setAnomalyScore(parsed.ml_insights.anomaly_score || 0.18);
+            setAnomalyFactors(parsed.ml_insights.anomaly_contributing_factors || []);
+            return;
+          }
+        } catch {}
       }
-    }
+      try {
+        const list = await listAssessments();
+        if (list && list.length > 0) {
+          const detail = await getAssessment(list[0].id);
+          if (detail.ml_insights) {
+            setUserCoords(detail.ml_insights.pca_coordinates || { x: 2.85, y: 0.42 });
+            setActiveArchetype(detail.ml_insights.cluster_name || 'Balanced High-Achiever');
+            setIsAnomaly(detail.ml_insights.is_anomaly || false);
+            setAnomalyScore(detail.ml_insights.anomaly_score || 0.18);
+            setAnomalyFactors(detail.ml_insights.anomaly_contributing_factors || []);
+          }
+        }
+      } catch {}
+    };
+
+    loadAssessmentInsights();
   }, []);
 
   return (
