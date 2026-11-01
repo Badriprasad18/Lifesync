@@ -1,0 +1,82 @@
+{
+  "0": {
+    "name": "Balanced High-Achiever",
+    "description": "Harmonious balance across physical activity, consistent sleep, and low stress.",
+    "centroid": {
+      "sleep_hours": 7.81,
+      "sleep_quality": 3.74,
+      "exercise_minutes": 44.69,
+      "activity_frequency_days": 4.33,
+      "sitting_hours": 5.51,
+      "water_intake_liters": 3.01,
+      "meals_regularity": 2.34,
+      "fruit_veg_servings": 4.03,
+      "stress_level": 2.74,
+      "total_screen_hours": 6.17
+    },
+    "pca_coordinates": {
+      "x": 3.795,
+      "y": 0.667
+    }
+  },
+  "1": {
+    "name": "Sedentary Digital Workaholic",
+    "description": "Heavy daily screen exposure with extended sitting and sub-optimal hydration breaks.",
+    "centroid": {
+      "sleep_hours": 5.8,
+      "sleep_quality": 2.05,
+      "exercise_minutes": 15.68,
+      "activity_frequency_days": 1.3,
+      "sitting_hours": 9.54,
+      "water_intake_liters": 1.68,
+      "meals_regularity": 1.38,
+      "fruit_veg_servings": 1.21,
+      "stress_level": 6.72,
+      "total_screen_hours": 10.35
+    },
+    "pca_coordinates": {
+      "x": -1.51,
+      "y": 0.226
+    }
+  },
+  "2": {
+    "name": "Stressed Academic / Crammer",
+    "description": "Elevated stress, irregular nutrition timing, and chronic sleep restriction.",
+    "centroid": {
+      "sleep_hours": 3.79,
+      "sleep_quality": 1.08,
+      "exercise_minutes": 4.27,
+      "activity_frequency_days": 0.09,
+      "sitting_hours": 13.47,
+      "water_intake_liters": 0.82,
+      "meals_regularity": 1.0,
+      "fruit_veg_servings": 0.19,
+      "stress_level": 8.81,
+      "total_screen_hours": 14.4
+    },
+    "pca_coordinates": {
+      "x": -4.766,
+      "y": 0.807
+    }
+  },
+  "3": {
+    "name": "Low-Activity Casual",
+    "description": "Moderate digital habits with low weekly physical exercise and baseline hydration deficits.",
+    "centroid": {
+      "sleep_hours": 7.22,
+      "sleep_quality": 2.75,
+      "exercise_minutes": 11.05,
+      "activity_frequency_days": 1.05,
+      "sitting_hours": 7.11,
+      "water_intake_liters": 2.0,
+      "meals_regularity": 1.99,
+      "fruit_veg_servings": 2.01,
+      "stress_level": 4.37,
+      "total_screen_hours": 6.61
+    },
+    "pca_coordinates": {
+      "x": 0.539,
+      "y": -1.314
+    }
+  }
+}

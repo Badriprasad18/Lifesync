@@ -193,43 +193,9 @@ def compute_lifestyle_assessment_results(data: AssessmentCreateRequest) -> Dict[
     else:
         risk_tier = "Critical Alert"
 
-    # Cluster Archetype Evaluation
-    total_screen = data.work_screen_hours + data.recreational_screen_hours
-    if total_screen >= 10.0 and data.sitting_hours >= 8.0:
-        cluster_id = 1
-        cluster_name = "Sedentary Digital Workaholic"
-        cluster_desc = "Characterized by high screen exposure, extended sitting, and sub-optimal hydration."
-        pca_x, pca_y = 1.95, -0.75
-    elif data.stress_level >= 7 and data.sleep_hours < 6.5:
-        cluster_id = 2
-        cluster_name = "Stressed Academic / Crammer"
-        cluster_desc = "High academic or workplace stress, variable sleep routines, and reliance on stimulants."
-        pca_x, pca_y = 0.85, 2.15
-    elif composite_lwi >= 75.0 and data.exercise_minutes >= 30:
-        cluster_id = 0
-        cluster_name = "Balanced High-Achiever"
-        cluster_desc = "Maintains consistent sleep hygiene, regular activity, and balanced digital habits."
-        pca_x, pca_y = -2.10, 1.35
-    else:
-        cluster_id = 3
-        cluster_name = "Low-Activity Casual"
-        cluster_desc = "Moderate screen use with lower physical activity and baseline hydration deficits."
-        pca_x, pca_y = -0.70, -1.65
-
-    # Multi-factor Anomaly Detection
-    is_anomaly = False
-    anomaly_factors = []
-    if data.sleep_hours < 4.5 and total_screen >= 12.0:
-        is_anomaly = True
-        anomaly_factors.append("Extreme sleep deficit combined with excessive screen hours")
-    if data.stress_level >= 9 and data.sleep_hours < 5.0:
-        is_anomaly = True
-        anomaly_factors.append("Acute stress combined with critically suppressed sleep duration")
-    if data.water_intake_liters < 1.0 and total_screen >= 10.0:
-        is_anomaly = True
-        anomaly_factors.append("Severe cellular dehydration under heavy digital workload")
-
-    anomaly_score = -0.21 if is_anomaly else 0.45
+    # Real Machine Learning Inference (KMeans, PCA, Isolation Forest)
+    from app.ml.engine import ml_engine
+    ml_insights = ml_engine.analyze_lifestyle_vector(data)
 
     # Generate Personalized Recommendations
     recommendations = []
@@ -334,15 +300,6 @@ def compute_lifestyle_assessment_results(data: AssessmentCreateRequest) -> Dict[
             "habits": round(habits_s, 1),
         },
         "deductions": all_deductions,
-        "ml_insights": {
-            "cluster_id": cluster_id,
-            "cluster_name": cluster_name,
-            "cluster_description": cluster_desc,
-            "distance_to_center": 0.35,
-            "pca_coordinates": {"x": pca_x, "y": pca_y},
-            "is_anomaly": is_anomaly,
-            "anomaly_score": anomaly_score,
-            "anomaly_contributing_factors": anomaly_factors,
-        },
+        "ml_insights": ml_insights,
         "recommendations": recommendations,
     }

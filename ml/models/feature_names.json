@@ -1,0 +1,12 @@
+[
+  "sleep_hours",
+  "sleep_quality",
+  "exercise_minutes",
+  "activity_frequency_days",
+  "sitting_hours",
+  "water_intake_liters",
+  "meals_regularity",
+  "fruit_veg_servings",
+  "stress_level",
+  "total_screen_hours"
+]

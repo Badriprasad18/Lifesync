@@ -143,3 +143,11 @@ def get_dashboard_trends(
         lowest_lwi=lowest_lwi,
         total_points=len(timeline),
     )
+
+
+@router.get("/clusters")
+def get_cluster_benchmarks():
+    """Retrieve population cluster archetypes and PCA coordinates for scatter plotting."""
+    from app.ml.engine import ml_engine
+    return ml_engine.get_cluster_archetypes()
+
