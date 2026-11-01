@@ -1,106 +1,181 @@
 # LifeSync AI
 
 > **Artificial Intelligence-Based Lifestyle Risk Assessment and Personalized Wellness Recommendation Platform**  
-> *IBST Mini Project | Master of Computer Applications (MCA)*
+> *Master of Computer Applications (MCA) — Information-Based Software Technology (IBST) Project*
+
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110.0-teal.svg)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-18.x-61dafb.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.4-38bdf8.svg)](https://tailwindcss.com/)
+[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.4%2B-orange.svg)](https://scikit-learn.org/)
+[![SQLite](https://img.shields.io/badge/SQLite-WAL--Mode-003B57.svg)](https://www.sqlite.org/)
+[![Tests](https://img.shields.io/badge/Tests-43%20Passed%20(100%25)-brightgreen.svg)]()
 
 ---
 
 ## 1. Project Overview
 
-**LifeSync AI** is a full-stack, local-first lifestyle analytics and health hygiene platform. It evaluates daily lifestyle metrics across six foundational pillars (sleep, physical activity, nutrition & hydration, stress, screen time, and general habits) using an explainable heuristic scoring engine, combined with unsupervised machine learning (**K-Means Clustering** for demographic archetype classification and **Isolation Forest** for acute compound anomaly detection).
+**LifeSync AI** is an intelligent, full-stack lifestyle wellness intelligence and risk assessment platform designed to help university students, young professionals, and sedentary computer workers quantify, understand, and optimize daily lifestyle habits.
 
-> [!IMPORTANT]
-> **Educational Disclaimer:** LifeSync AI is developed strictly for educational and lifestyle self-improvement purposes. It is not a clinical medical diagnostic tool and does not provide clinical prescriptions or treatments.
-
----
-
-## 2. Technology Stack
-
-- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS, Recharts, Lucide Icons
-- **Backend:** Python 3.10+, FastAPI, Pydantic v2, SQLAlchemy 2.0
-- **Database:** SQLite 3 (WAL mode enabled)
-- **Machine Learning:** Scikit-Learn, Pandas, NumPy, Joblib
-- **Authentication:** Stateless Bearer JWT & Bcrypt password hashing
-- **Reporting:** ReportLab (Pure Python PDF Generation)
+The platform continuously audits six core lifestyle dimensions using genuine Machine Learning algorithms:
+1. **Sleep Hygiene & Rest:** Daily duration, wake freshness, circadian schedule consistency.
+2. **Physical Activity & Movement:** Active minutes, weekly workout frequency, step counts, sedentary sitting hours.
+3. **Nutrition & Hydration:** Daily water volume, hydration regularity, meal consistency, fruit/vegetable intake, junk food frequency.
+4. **Mental Wellbeing & Stress:** Perceived stress scale, daily mindfulness minutes, study/work-life balance.
+5. **Digital Hygiene:** Recreational vs. work screen hours, screen break regularity, pre-sleep blue light exposure.
+6. **Substance Habits & Recovery:** Caffeine consumption, tobacco, alcohol, and restorative recovery routines.
 
 ---
 
-## 3. Project Structure
+## 2. Key Capabilities & AI Innovations
 
-```text
-Lifestyle/
-├── backend/                  # FastAPI Application
-│   ├── app/                  # Application code (models, schemas, routers, services, ml)
-│   ├── data/                 # SQLite database storage
-│   ├── tests/                # Automated pytest test suites
-│   ├── venv/                 # Local Python virtual environment
-│   ├── requirements.txt      # Backend Python dependencies
-│   ├── .env.example          # Environment template
-│   └── README.md             # Backend setup & API documentation
-│
-├── frontend/                 # React + TypeScript + Vite Client
-│   ├── src/                  # React source (components, pages, services, types)
-│   ├── package.json          # Frontend dependencies & scripts
-│   ├── tailwind.config.js    # Tailwind styling tokens
-│   ├── vite.config.ts        # Vite configuration & proxy settings
-│   ├── .env.example          # Frontend environment template
-│   └── README.md             # Frontend setup instructions
-│
-├── ml/                       # Machine Learning Engineering Subsystem
-│   ├── datasets/             # Calibrated synthetic baseline datasets
-│   ├── training/             # Scikit-Learn training pipelines
-│   └── models/               # Pickled model artifacts (.pkl)
-│
-├── docs/                     # Architectural & Engineering Specifications
-│   ├── PRD.md                # Product Requirements Document
-│   ├── SYSTEM_ARCHITECTURE.md# Complete System Architecture
-│   ├── DATABASE_DESIGN.md    # Relational Database Schema & WAL
-│   ├── ML_DESIGN.md          # Explainable Scoring & ML Formulas
-│   ├── API_DESIGN.md         # REST API Endpoints Specification
-│   ├── UI_UX_DESIGN.md       # Visual Design System & Wireframes
-│   ├── IMPLEMENTATION_PLAN.md# 9-Phase Development Roadmap
-│   └── TESTING_PLAN.md       # Quality Assurance & Testing Strategy
-│
-├── .gitignore                # Git ignore configuration
-└── README.md                 # Main project documentation
+* **Transparent LifeSync Wellness Index (LWI):** A deterministic, explainable 0–100 wellness index derived from multidimensional weighted scoring and itemized audit deductions.
+* **Unsupervised Demographic Clustering (K-Means):** Unsupervised clustering ($k=4$) trained on $N=1,500$ demographic samples to assign users to lifestyle archetypes (*Balanced High-Achiever, Sedentary Overextended, Irregular Burnout, Wellness Optimizer*).
+* **2D Latent Feature Projection (PCA):** Principal Component Analysis capturing >70% explained variance to plot the user's multi-attribute lifestyle coordinate relative to population centroids.
+* **Statistical Anomaly Detection (Isolation Forest):** Unsupervised ensemble tree partitioning identifying high-risk habit irregularities (e.g. chronic screen exposure combined with severe sleep deficit).
+* **Personalized Habit Recommendation Engine:** Dynamic habit action center providing prioritized micro-habits, physiological justifications ("why this works"), and interactive habit completion toggling.
+* **Longitudinal Behavioral Trends:** Recharts time-series progression mapping milestone scores across chronological assessment checkpoints.
+* **Executive PDF Report Generator:** ReportLab-powered PDF compiler generating downloadable, branded evaluation reports with diagnostic disclaimers.
+
+---
+
+## 3. Technology Stack
+
+| Layer | Technologies Employed |
+|---|---|
+| **Frontend Client** | React 18, TypeScript, Vite, Tailwind CSS (Dual Dark/Light Theme), Recharts, Framer Motion, Lucide React, Axios |
+| **Backend API** | Python 3.10+, FastAPI (Asynchronous REST API), Pydantic v2 (Validation), ReportLab (PDF Engine) |
+| **Machine Learning** | Scikit-Learn, Pandas, NumPy, Joblib |
+| **Database & Auth** | SQLite 3 (WAL mode), SQLAlchemy 2.0 ORM, Passlib (Bcrypt), Python-JOSE (JWT HS256) |
+| **Quality Assurance** | Pytest, HTTPX, Chrome Browser Instrumentation |
+
+---
+
+## 4. Application Architecture & Pages
+
+```
+LifeSync AI Web Application
+├── Public Landing Page (/)
+├── User Authentication (/login, /register)
+└── Protected Dashboard Shell
+    ├── /dashboard              → Holistic KPI Overview, Radial Score Gauge, Pillar Radar
+    ├── /assessment             → 6-Step Multi-Pillar Lifestyle Questionnaire Wizard
+    ├── /assessment/results     → Algorithmic Scoring Breakdown & PDF Download
+    ├── /ai-analysis            → 2D PCA Demographic Scatter Plot & Anomaly Insights
+    ├── /recommendations        → Interactive Habit Action Center & Completion Tracking
+    ├── /analytics              → Longitudinal Behavioral Trends & Benchmark Matrix
+    ├── /history                → Audit Trail Sessions Table & PDF Report Export
+    ├── /profile                → Biometric Profile & Dynamic BMI Computation
+    └── /settings               → Dark/Light Theme Switching & JSON Backup Export
 ```
 
 ---
 
-## 4. Quick Start (Windows Localhost)
+## 5. Quick Start (Windows)
 
-### 4.1 Running the Backend Service
-1. Open a PowerShell terminal in the `backend/` directory:
-   ```powershell
-   cd backend
-   .\venv\Scripts\Activate.ps1
-   uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-   ```
-2. Verify API status at:
-   - Health Check: [http://localhost:8000/api/health](http://localhost:8000/api/health)
-   - Swagger Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+### Prerequisites
+* **Python 3.10+**
+* **Node.js 18+ & npm**
 
-### 4.2 Running the Frontend Client
-1. Open a separate PowerShell terminal in the `frontend/` directory:
-   ```powershell
-   cd frontend
-   npm run dev
-   ```
-2. Open your browser and navigate to:
-   - Application URL: [http://localhost:5173](http://localhost:5173)
+### Option A: One-Click Launcher (Recommended)
+Simply double-click:
+```bat
+run_all.bat
+```
+This automatically starts both the FastAPI backend (`http://127.0.0.1:8000`) and Vite frontend client (`http://localhost:5173`) in dedicated command windows.
+
+### Option B: Manual Execution
+
+#### 1. Backend Server Setup
+```powershell
+cd backend
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+*API Swagger Documentation is available at: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)*
+
+#### 2. Frontend Client Setup
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+*Frontend User Interface is accessible at: [http://localhost:5173](http://localhost:5173)*
+
+#### 3. Instant Demo Login Credentials
+* **Email:** `student_mca@college.edu`
+* **Password:** `StudentPassword123!`
+*(Or click the "Instant Demo Access" button on the Login page)*
 
 ---
 
-## 5. Development Status
+## 6. Project Structure
 
-| Phase | Description | Status |
-| :---: | :--- | :---: |
-| **Phase 1** | System Planning & Specifications (8 Core Documents) | Completed |
-| **Phase 2** | Project Scaffolding, Environment Setup & Health Verification | Completed |
-| **Phase 3** | Database Layer & SQLAlchemy Models | Next |
-| **Phase 4** | Explainable Scoring Engine & Heuristics | Planned |
-| **Phase 5** | Machine Learning Pipelines (KMeans & Isolation Forest) | Planned |
-| **Phase 6** | REST APIs & ReportLab PDF Generation | Planned |
-| **Phase 7** | Frontend UI Pages & Recharts Visualizations | Planned |
-| **Phase 8** | Integration & End-to-End System Testing | Planned |
-| **Phase 9** | Final Verification & Academic Packaging | Planned |
+```
+Lifestyle/
+├── backend/
+│   ├── app/
+│   │   ├── ml/                 # KMeans, PCA, Scaler & Isolation Forest models
+│   │   ├── models/             # SQLAlchemy ORM database models
+│   │   ├── routers/            # FastAPI REST API endpoints
+│   │   ├── schemas/            # Pydantic v2 validation schemas
+│   │   ├── services/           # Scoring engine, recommendations & ReportLab PDF
+│   │   ├── utils/              # Security, JWT tokens & password hashing
+│   │   ├── config.py           # Application settings & CORS
+│   │   ├── database.py         # Database engine & session maker
+│   │   └── main.py             # FastAPI entrypoint
+│   ├── tests/                  # 43 automated unit & integration tests
+│   └── requirements.txt        # Python backend dependencies
+├── frontend/
+│   ├── src/
+│   │   ├── components/         # Reusable charts, gauges, cards, wizard
+│   │   ├── context/            # AuthContext & ThemeContext
+│   │   ├── layouts/            # AppLayout sidebar & mobile drawer shell
+│   │   ├── pages/              # 12 fully integrated application pages
+│   │   ├── services/           # Centralized API service & demo fallbacks
+│   │   ├── types/              # Complete TypeScript interfaces
+│   │   ├── App.tsx             # Routing & route guards
+│   │   └── index.css           # Design tokens, glassmorphism & themes
+│   ├── package.json
+│   └── vite.config.ts
+├── docs/                       # Project planning & architectural documents
+├── run_backend.bat             # Batch launcher for backend
+├── run_frontend.bat            # Batch launcher for frontend
+├── run_all.bat                 # One-click dual launcher
+├── PROJECT_OVERVIEW.md         # Full Academic Project Report
+├── SYSTEM_ARCHITECTURE.md      # Detailed Architecture & Component Diagrams
+├── DATABASE_DESIGN.md          # Database Entities & Schema Specifications
+├── ER_DIAGRAM.md               # Entity Relationship Diagram & Cardinalities
+├── USE_CASE_DIAGRAM.md         # Actor Use Cases & Workflow Specifications
+├── DATA_FLOW_DIAGRAM.md        # DFD Level 0, Level 1, Level 2 Diagrams
+├── ML_METHODOLOGY.md           # Machine Learning Methodology & Clustering
+├── API_DOCUMENTATION.md        # Comprehensive REST API Specification
+├── TESTING_REPORT.md           # 43/43 QA Test Results & Audit Log
+├── INSTALLATION_GUIDE.md       # Windows Deployment & Fresh Setup Guide
+└── USER_MANUAL.md              # Demonstration Guide & University Viva Q&A
+```
+
+---
+
+## 7. Automated Testing Status
+
+The platform has been audited using comprehensive test automation:
+* **Backend Test Suite:** `43 / 43 tests passing (100%)` via `pytest`.
+* **Frontend Compilation:** `0 TypeScript errors` across 2,370 modules via `npm run build`.
+* **Console Errors:** `0 runtime console errors` verified across all routes.
+
+To run the automated tests:
+```powershell
+cd backend
+.\venv\Scripts\activate
+pytest -v
+```
+
+---
+
+## 8. Academic & Ethical Disclaimer
+
+LifeSync AI is developed strictly for educational and self-reflection purposes as part of the MCA curriculum. The scores, classifications, and recommendations provided do **NOT** constitute medical diagnoses, clinical advice, or treatment plans. Users experiencing acute physical or psychological health concerns are directed to consult licensed healthcare professionals.
