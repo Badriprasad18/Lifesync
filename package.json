@@ -1,0 +1,10 @@
+{
+  "name": "lifesync-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LifeSync AI - Lifestyle Risk Assessment & Wellness Intelligence Platform",
+  "scripts": {
+    "build": "npm --prefix frontend install && npm --prefix frontend run build",
+    "dev": "npm --prefix frontend run dev"
+  }
+}
