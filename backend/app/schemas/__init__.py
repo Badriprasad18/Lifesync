@@ -8,6 +8,7 @@ from app.schemas.user import (
 )
 from app.schemas.assessment import (
     AssessmentCreateRequest,
+    AssessmentUpdateRequest,
     AssessmentDetailResponse,
     AssessmentSummaryResponse,
     WellnessScoreResponse,
@@ -27,6 +28,7 @@ __all__ = [
     "UserProfileResponse",
     "TokenResponse",
     "AssessmentCreateRequest",
+    "AssessmentUpdateRequest",
     "AssessmentDetailResponse",
     "AssessmentSummaryResponse",
     "WellnessScoreResponse",

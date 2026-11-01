@@ -12,13 +12,74 @@ export interface HealthCheckResponse {
 
 export interface UserProfile {
   id: number;
-  email: string;
+  user_id: number;
   full_name: string;
   age: number;
   gender: string;
+  height_cm?: number;
+  weight_kg?: number;
+  occupation?: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface AssessmentScores {
+export interface User {
+  id: number;
+  email: string;
+  is_active: boolean;
+  created_at: string;
+  profile?: UserProfile;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
+}
+
+export interface AssessmentFormData {
+  // 1. Sleep
+  sleep_hours: number;
+  sleep_consistency: number;
+  sleep_quality: number;
+  wake_freshness: number;
+
+  // 2. Physical Activity
+  exercise_minutes: number;
+  activity_frequency_days: number;
+  step_count: number;
+  sitting_hours: number;
+
+  // 3. Hydration
+  water_intake_liters: number;
+  hydration_habit: string;
+
+  // 4. Nutrition
+  meals_regularity: number;
+  fruit_veg_servings: number;
+  junk_food_freq: number;
+
+  // 5. Mental Wellness
+  stress_level: number;
+  mindfulness_minutes: number;
+  work_life_balance: number;
+
+  // 6. Digital Habits
+  recreational_screen_hours: number;
+  work_screen_hours: number;
+  screen_break_frequency: string;
+  screen_before_bed: boolean;
+
+  // General Habits
+  caffeine_cups: number;
+  smoking_status: string;
+  alcohol_freq: string;
+  notes?: string;
+}
+
+export interface WellnessScore {
+  id: number;
+  assessment_id: number;
   composite_lwi: number;
   risk_tier: 'Optimal' | 'Fair' | 'Elevated Risk' | 'Critical Alert';
   pillars: {
@@ -30,4 +91,60 @@ export interface AssessmentScores {
     habits: number;
   };
   deductions: string[];
+  created_at: string;
+}
+
+export interface MLInsights {
+  id: number;
+  assessment_id: number;
+  cluster_id: number;
+  cluster_name: string;
+  cluster_description?: string;
+  distance_to_center: number;
+  pca_coordinates: { x: number; y: number };
+  is_anomaly: boolean;
+  anomaly_score: number;
+  anomaly_contributing_factors: string[];
+}
+
+export interface Recommendation {
+  id: number;
+  category: string;
+  priority: 'high' | 'medium' | 'low';
+  title: string;
+  description: string;
+  action_item: string;
+  is_completed: boolean;
+}
+
+export interface AssessmentDetail {
+  id: number;
+  user_id: number;
+  assessed_at: string;
+  inputs: Record<string, any>;
+  scores: WellnessScore;
+  ml_insights: MLInsights;
+  recommendations: Recommendation[];
+}
+
+export interface AssessmentSummary {
+  id: number;
+  assessed_at: string;
+  composite_lwi: number;
+  risk_tier: string;
+  cluster_name: string;
+  is_anomaly: boolean;
+}
+
+export interface DashboardSummary {
+  total_assessments: number;
+  latest_assessment_id?: number;
+  latest_lwi?: number;
+  latest_risk_tier?: string;
+  latest_cluster?: string;
+  is_latest_anomaly: boolean;
+  best_pillar?: string;
+  lowest_pillar?: string;
+  pending_actions_count: number;
+  user_name: string;
 }

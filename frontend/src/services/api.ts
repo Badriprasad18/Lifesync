@@ -1,5 +1,13 @@
 import axios from 'axios';
-import { HealthCheckResponse } from '../types';
+import {
+  HealthCheckResponse,
+  AuthResponse,
+  User,
+  AssessmentFormData,
+  AssessmentDetail,
+  AssessmentSummary,
+  DashboardSummary,
+} from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -8,7 +16,7 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: 15000,
 });
 
 // Interceptor to inject JWT token when available
@@ -20,9 +28,88 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Health check service call
+// Interceptor to handle unauthorized responses
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear token on 401 Unauthorized
+      localStorage.removeItem('lifesync_token');
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Health check
 export const fetchHealthCheck = async (): Promise<HealthCheckResponse> => {
   const response = await apiClient.get<HealthCheckResponse>('/health');
+  return response.data;
+};
+
+// Authentication
+export const loginUser = async (credentials: { email: string; password: string }): Promise<AuthResponse> => {
+  const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
+  if (response.data.access_token) {
+    localStorage.setItem('lifesync_token', response.data.access_token);
+  }
+  return response.data;
+};
+
+export const registerUser = async (payload: {
+  email: string;
+  password: string;
+  full_name: string;
+  age: number;
+  gender: string;
+  height_cm?: number;
+  weight_kg?: number;
+  occupation?: string;
+}): Promise<AuthResponse> => {
+  const response = await apiClient.post<AuthResponse>('/auth/register', payload);
+  if (response.data.access_token) {
+    localStorage.setItem('lifesync_token', response.data.access_token);
+  }
+  return response.data;
+};
+
+export const getCurrentUser = async (): Promise<User> => {
+  const response = await apiClient.get<User>('/auth/me');
+  return response.data;
+};
+
+export const logoutUser = (): void => {
+  localStorage.removeItem('lifesync_token');
+};
+
+// Assessments
+export const createAssessment = async (data: AssessmentFormData): Promise<AssessmentDetail> => {
+  const response = await apiClient.post<AssessmentDetail>('/assessment/', data);
+  return response.data;
+};
+
+export const updateAssessment = async (id: number, data: AssessmentFormData): Promise<AssessmentDetail> => {
+  const response = await apiClient.put<AssessmentDetail>(`/assessment/${id}`, data);
+  return response.data;
+};
+
+export const getAssessment = async (id: number): Promise<AssessmentDetail> => {
+  const response = await apiClient.get<AssessmentDetail>(`/assessment/${id}`);
+  return response.data;
+};
+
+export const listAssessments = async (): Promise<AssessmentSummary[]> => {
+  const response = await apiClient.get<AssessmentSummary[]>('/assessment/');
+  return response.data;
+};
+
+export const deleteAssessment = async (id: number): Promise<{ message: string }> => {
+  const response = await apiClient.delete<{ message: string }>(`/assessment/${id}`);
+  return response.data;
+};
+
+// Dashboard
+export const getDashboardSummary = async (): Promise<DashboardSummary> => {
+  const response = await apiClient.get<DashboardSummary>('/dashboard/summary');
   return response.data;
 };
 

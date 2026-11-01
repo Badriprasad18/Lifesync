@@ -14,33 +14,40 @@ class LifestyleAssessment(Base):
 
     # 1. Sleep Metrics
     sleep_hours = Column(Float, nullable=False)
-    sleep_quality = Column(Integer, nullable=False)  # 1 to 5
-    wake_freshness = Column(Integer, nullable=False)  # 1 to 5
+    sleep_consistency = Column(Integer, nullable=False, default=4)  # 1 (Erratic) to 5 (Consistent schedule)
+    sleep_quality = Column(Integer, nullable=False)  # 1 (Very Poor) to 5 (Excellent)
+    wake_freshness = Column(Integer, nullable=False)  # 1 (Exhausted) to 5 (Refreshed)
 
     # 2. Physical Activity Metrics
-    exercise_minutes = Column(Integer, nullable=False)  # 0 to 720
-    step_count = Column(Integer, nullable=False)  # 0 to 100,000
-    sitting_hours = Column(Float, nullable=False)  # 0 to 24
+    exercise_minutes = Column(Integer, nullable=False)  # Daily activity duration (0 to 720 mins)
+    activity_frequency_days = Column(Integer, nullable=False, default=3)  # Weekly frequency (0 to 7 days)
+    step_count = Column(Integer, nullable=False, default=5000)  # Estimated daily steps
+    sitting_hours = Column(Float, nullable=False)  # Sedentary sitting behavior (0 to 24 hrs)
 
-    # 3. Nutrition & Hydration Metrics
-    water_intake_liters = Column(Float, nullable=False)  # 0 to 15
-    meals_regularity = Column(Integer, nullable=False)  # 1=Irregular, 2=Somewhat, 3=Consistent
+    # 3. Hydration Metrics
+    water_intake_liters = Column(Float, nullable=False)  # Daily intake in liters
+    hydration_habit = Column(String(50), nullable=False, default="regular")  # "regular", "thirst_only", "reminders_needed"
+
+    # 4. Nutrition Metrics
+    meals_regularity = Column(Integer, nullable=False)  # 1=Irregular, 2=Somewhat regular, 3=Consistent
+    fruit_veg_servings = Column(Integer, nullable=False)  # Servings per day (0 to 15)
     junk_food_freq = Column(Integer, nullable=False)  # 0=Never, 1=1-2x/wk, 2=3-4x/wk, 3=Daily, 4=Multiple/day
-    fruit_veg_servings = Column(Integer, nullable=False)  # 0 to 15
 
-    # 4. Stress & Mental Wellbeing Metrics
-    stress_level = Column(Integer, nullable=False)  # 1 (Low) to 10 (Extreme)
-    mindfulness_minutes = Column(Integer, nullable=False)  # 0 to 360
+    # 5. Mental Wellness Metrics
+    stress_level = Column(Integer, nullable=False)  # 1 (Calm/Low) to 10 (Burnout)
+    mindfulness_minutes = Column(Integer, nullable=False, default=10)  # Relaxation time per day
+    work_life_balance = Column(Integer, nullable=False, default=3)  # 1 (Poor) to 5 (Optimal balance)
 
-    # 5. Screen & Digital Habits
-    work_screen_hours = Column(Float, nullable=False)  # 0 to 24
-    recreational_screen_hours = Column(Float, nullable=False)  # 0 to 24
-    screen_before_bed = Column(Boolean, nullable=False)  # Within 1h before bed
+    # 6. Digital Habits Metrics
+    recreational_screen_hours = Column(Float, nullable=False)  # Recreational screen time (0 to 24)
+    work_screen_hours = Column(Float, nullable=False)  # Study/work screen time (0 to 24)
+    screen_break_frequency = Column(String(50), nullable=False, default="occasional")  # "every_30m", "hourly", "rarely"
+    screen_before_bed = Column(Boolean, nullable=False)  # Looking at screens within 1h of bedtime
 
-    # 6. Stimulants & General Habits
-    caffeine_cups = Column(Integer, nullable=False)  # 0 to 20
-    smoking_status = Column(String(20), nullable=False)  # "never", "occasional", "frequent"
-    alcohol_freq = Column(String(20), nullable=False)  # "none", "occasional", "frequent"
+    # General Habits
+    caffeine_cups = Column(Integer, nullable=False, default=1)
+    smoking_status = Column(String(20), nullable=False, default="never")
+    alcohol_freq = Column(String(20), nullable=False, default="none")
 
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, index=True)

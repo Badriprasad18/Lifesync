@@ -252,3 +252,110 @@ def test_dashboard_summary_and_trends():
     assert len(trends["timeline"]) >= 2
     assert trends["average_lwi"] > 0
     assert trends["highest_lwi"] >= trends["lowest_lwi"]
+
+
+def test_edit_assessment():
+    """Verify PUT /api/assessment/{id} updates values and recomputes scores."""
+    token = client.post("/api/auth/login", json={
+        "email": "student_alpha@college.edu",
+        "password": "SecurePassword123!",
+    }).json()["access_token"]
+
+    # 1. Create initial assessment
+    create_res = client.post(
+        "/api/assessment/",
+        json={
+            "sleep_hours": 6.0,
+            "sleep_consistency": 3,
+            "sleep_quality": 3,
+            "wake_freshness": 3,
+            "exercise_minutes": 15,
+            "activity_frequency_days": 2,
+            "step_count": 4000,
+            "sitting_hours": 9.0,
+            "water_intake_liters": 1.5,
+            "hydration_habit": "thirst_only",
+            "meals_regularity": 2,
+            "fruit_veg_servings": 2,
+            "junk_food_freq": 2,
+            "stress_level": 7,
+            "mindfulness_minutes": 5,
+            "work_life_balance": 2,
+            "recreational_screen_hours": 4.0,
+            "work_screen_hours": 7.0,
+            "screen_break_frequency": "rarely",
+            "screen_before_bed": True,
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assessment_id = create_res.json()["id"]
+    initial_lwi = create_res.json()["scores"]["composite_lwi"]
+
+    # 2. Edit assessment with improved healthy habits
+    update_res = client.put(
+        f"/api/assessment/{assessment_id}",
+        json={
+            "sleep_hours": 8.0,
+            "sleep_consistency": 5,
+            "sleep_quality": 5,
+            "wake_freshness": 5,
+            "exercise_minutes": 45,
+            "activity_frequency_days": 5,
+            "step_count": 9500,
+            "sitting_hours": 5.0,
+            "water_intake_liters": 3.0,
+            "hydration_habit": "regular",
+            "meals_regularity": 3,
+            "fruit_veg_servings": 5,
+            "junk_food_freq": 0,
+            "stress_level": 2,
+            "mindfulness_minutes": 20,
+            "work_life_balance": 5,
+            "recreational_screen_hours": 1.5,
+            "work_screen_hours": 5.0,
+            "screen_break_frequency": "every_30m",
+            "screen_before_bed": False,
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert update_res.status_code == 200
+    updated_data = update_res.json()
+    assert updated_data["inputs"]["sleep_hours"] == 8.0
+    assert updated_data["scores"]["composite_lwi"] > initial_lwi, "LWI score should increase with improved inputs"
+
+
+def test_cancel_delete_assessment():
+    """Verify DELETE /api/assessment/{id} cancels and deletes the assessment."""
+    token = client.post("/api/auth/login", json={
+        "email": "student_alpha@college.edu",
+        "password": "SecurePassword123!",
+    }).json()["access_token"]
+
+    # Create assessment to delete
+    create_res = client.post(
+        "/api/assessment/",
+        json={
+            "sleep_hours": 7.0,
+            "sleep_quality": 3,
+            "exercise_minutes": 20,
+            "sitting_hours": 8.0,
+            "water_intake_liters": 2.0,
+            "meals_regularity": 2,
+            "fruit_veg_servings": 2,
+            "junk_food_freq": 1,
+            "stress_level": 5,
+            "recreational_screen_hours": 3.0,
+            "screen_before_bed": False,
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assessment_id = create_res.json()["id"]
+
+    # Delete
+    del_res = client.delete(f"/api/assessment/{assessment_id}", headers={"Authorization": f"Bearer {token}"})
+    assert del_res.status_code == 200
+    assert "deleted" in del_res.json()["message"].lower()
+
+    # Verify not found afterwards
+    get_res = client.get(f"/api/assessment/{assessment_id}", headers={"Authorization": f"Bearer {token}"})
+    assert get_res.status_code == 404

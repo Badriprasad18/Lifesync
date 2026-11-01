@@ -9,107 +9,125 @@ def clamp(val: float, min_val: float = 0.0, max_val: float = 100.0) -> float:
 
 
 def evaluate_sleep(data: AssessmentCreateRequest) -> Tuple[float, List[str]]:
-    """Compute Sleep pillar score and log audit deductions."""
+    """Compute Sleep pillar score (duration, consistency, quality, freshness)."""
     deductions = []
-    # Duration evaluation (WHO & Sleep Foundation optimal: 7-9 hours)
     duration_penalty = 0.0
     if data.sleep_hours < 7.0:
         duration_penalty = 15.0 * (7.0 - data.sleep_hours)
-        deductions.append(f"-{duration_penalty:.1f} pts: Sleep duration ({data.sleep_hours}h) below 7h minimum benchmark")
+        deductions.append(f"-{duration_penalty:.1f} pts: Sleep duration ({data.sleep_hours}h) below recommended 7h baseline")
     elif data.sleep_hours > 9.0:
         duration_penalty = 10.0 * (data.sleep_hours - 9.0)
         deductions.append(f"-{duration_penalty:.1f} pts: Sleep duration ({data.sleep_hours}h) exceeds 9h optimal window")
 
-    quality_bonus = (data.sleep_quality * 5.0) + (data.wake_freshness * 5.0)  # Max 50
+    # Quality & schedule consistency factor
+    quality_bonus = (data.sleep_quality * 4.0) + (data.wake_freshness * 3.5) + (data.sleep_consistency * 2.5)  # Max 50
+    if data.sleep_consistency <= 2:
+        deductions.append("-8 pts: Erratic sleep schedule disrupts circadian rhythm")
+
     raw_score = 50.0 + quality_bonus - duration_penalty
     return clamp(raw_score), deductions
 
 
 def evaluate_activity(data: AssessmentCreateRequest) -> Tuple[float, List[str]]:
-    """Compute Physical Activity pillar score and deductions."""
+    """Compute Physical Activity pillar score (daily duration, weekly frequency, sedentary sitting)."""
     deductions = []
-    base_exercise = min(50.0, data.exercise_minutes * 1.25)
-    step_bonus = min(30.0, (data.step_count / 10000.0) * 30.0)
+    base_exercise = min(40.0, data.exercise_minutes * 1.0)
+    frequency_bonus = min(20.0, data.activity_frequency_days * 3.5)
+    step_bonus = min(20.0, (data.step_count / 10000.0) * 20.0)
 
     sitting_penalty = 0.0
     if data.sitting_hours > 8.0:
         sitting_penalty = (data.sitting_hours - 8.0) * 5.0
-        deductions.append(f"-{sitting_penalty:.1f} pts: Sedentary sitting ({data.sitting_hours}h) exceeds 8h/day threshold")
+        deductions.append(f"-{sitting_penalty:.1f} pts: Prolonged sitting ({data.sitting_hours}h) exceeds 8h/day sedentary limit")
 
-    if data.exercise_minutes < 20:
-        deductions.append(f"Low daily exercise ({data.exercise_minutes} mins) limits cardiovascular adaptation")
+    if data.exercise_minutes < 20 and data.activity_frequency_days < 2:
+        deductions.append("Low weekly activity frequency limits cardiovascular and posture benefits")
 
-    raw_score = 20.0 + base_exercise + step_bonus - sitting_penalty
+    raw_score = 20.0 + base_exercise + frequency_bonus + step_bonus - sitting_penalty
     return clamp(raw_score), deductions
 
 
 def evaluate_nutrition(data: AssessmentCreateRequest) -> Tuple[float, List[str]]:
-    """Compute Hydration & Nutrition pillar score and deductions."""
+    """Compute Hydration & Nutrition pillar score (hydration habits, produce intake, meal regularity, balance)."""
     deductions = []
 
-    # Hydration (Optimal: 2.5 - 3.5L)
+    # Hydration
     hydration_score = 35.0
     if data.water_intake_liters < 2.0:
         hyd_penalty = 15.0 * (2.0 - data.water_intake_liters)
         hydration_score -= hyd_penalty
-        deductions.append(f"-{hyd_penalty:.1f} pts: Hydration ({data.water_intake_liters}L) below 2.0L minimum hydration baseline")
-    elif data.water_intake_liters > 4.5:
+        deductions.append(f"-{hyd_penalty:.1f} pts: Daily hydration ({data.water_intake_liters}L) below 2.0L minimum")
+    if data.hydration_habit == "reminders_needed" or data.hydration_habit == "thirst_only":
         hydration_score -= 5.0
+        deductions.append("-5 pts: Hydration relies on thirst or irregular cues rather than consistent pacing")
 
-    # Fruits & Vegetables (Max 30 at 4 servings)
+    # Fruits & Vegetables
     produce_score = min(30.0, data.fruit_veg_servings * 7.5)
+    if data.fruit_veg_servings < 2:
+        deductions.append("Low daily vegetable and fruit servings (recommended 3-5 servings)")
 
     # Meal Regularity
     regularity_map = {1: 0.0, 2: 10.0, 3: 20.0}
     regularity_score = regularity_map.get(data.meals_regularity, 10.0)
     if data.meals_regularity == 1:
-        deductions.append("-10 pts: Irregular meal schedule detected")
+        deductions.append("-10 pts: Irregular meal schedule impacts blood sugar and sustained focus")
 
-    # Junk Food
+    # General Meal Balance & Junk Food
     junk_map = {0: 15.0, 1: 10.0, 2: 5.0, 3: 0.0, 4: -15.0}
     junk_score = junk_map.get(data.junk_food_freq, 5.0)
     if data.junk_food_freq >= 3:
-        deductions.append("-15 pts: High frequency junk food intake")
+        deductions.append("-15 pts: High-frequency processed/junk foods")
 
     raw_score = hydration_score + produce_score + regularity_score + junk_score
     return clamp(raw_score), deductions
 
 
 def evaluate_stress(data: AssessmentCreateRequest) -> Tuple[float, List[str]]:
-    """Compute Stress & Mental Wellbeing pillar score and deductions."""
+    """Compute Mental Wellness score (stress level, relaxation frequency, study/work-life balance)."""
     deductions = []
-    stress_inversion = (10.0 - data.stress_level) * 8.0  # Max 72 at stress=1
-    mindfulness_bonus = min(20.0, data.mindfulness_minutes * 1.0)  # Max 20
+    stress_inversion = (10.0 - data.stress_level) * 6.5  # Max 58.5 at stress=1
+    mindfulness_bonus = min(20.0, data.mindfulness_minutes * 1.0)
+    balance_bonus = (data.work_life_balance * 4.0)  # Max 20
 
     if data.stress_level >= 7:
-        deductions.append(f"Elevated stress level ({data.stress_level}/10) registered")
+        deductions.append(f"Elevated stress level ({data.stress_level}/10) reported")
+    if data.work_life_balance <= 2:
+        deductions.append("Strained study/work-life balance registered")
 
-    raw_score = 8.0 + stress_inversion + mindfulness_bonus
+    raw_score = 10.0 + stress_inversion + mindfulness_bonus + balance_bonus
     return clamp(raw_score), deductions
 
 
 def evaluate_screen(data: AssessmentCreateRequest) -> Tuple[float, List[str]]:
-    """Compute Screen & Digital Hygiene score and deductions."""
+    """Compute Digital Habits score (recreational screen time, break frequency, pre-bed habits)."""
     deductions = []
     total_screen = data.work_screen_hours + data.recreational_screen_hours
 
-    screen_base = 80.0
+    screen_base = 75.0
     if total_screen > 6.0:
-        penalty = (total_screen - 6.0) * 6.5
-        screen_base = max(10.0, 80.0 - penalty)
-        deductions.append(f"-{penalty:.1f} pts: High total daily screen time ({total_screen}h)")
+        penalty = (total_screen - 6.0) * 6.0
+        screen_base = max(10.0, 75.0 - penalty)
+        deductions.append(f"-{penalty:.1f} pts: Total screen time ({total_screen}h) exceeds 6h threshold")
 
+    # Screen Break Regularity
+    if data.screen_break_frequency == "every_30m":
+        screen_base += 15.0
+    elif data.screen_break_frequency == "rarely":
+        screen_base -= 10.0
+        deductions.append("-10 pts: Infrequent screen breaks increase ocular strain and postural fatigue")
+
+    # Pre-bed screen usage
     blue_light_penalty = 0.0
     if data.screen_before_bed:
-        blue_light_penalty = 20.0
-        deductions.append("-20 pts: Blue light exposure within 60 mins of bedtime")
+        blue_light_penalty = 15.0
+        deductions.append("-15 pts: Screen exposure within 60 minutes before bed inhibits melatonin release")
 
     raw_score = screen_base - blue_light_penalty
     return clamp(raw_score), deductions
 
 
 def evaluate_habits(data: AssessmentCreateRequest) -> Tuple[float, List[str]]:
-    """Compute Stimulants & General Habits score and deductions."""
+    """Compute Stimulants & General Habits score."""
     deductions = []
     score = 100.0
 
@@ -215,7 +233,6 @@ def compute_lifestyle_assessment_results(data: AssessmentCreateRequest) -> Dict[
 
     # Generate Personalized Recommendations
     recommendations = []
-    # Pillar priorities
     pillars = [
         ("Sleep", sleep_s),
         ("Physical Activity", activity_s),
@@ -224,10 +241,8 @@ def compute_lifestyle_assessment_results(data: AssessmentCreateRequest) -> Dict[
         ("Digital Hygiene", screen_s),
         ("Habits", habits_s),
     ]
-    # Sort lowest scoring pillars first
     pillars.sort(key=lambda x: x[1])
 
-    # Top recommendation for the weakest pillar
     weakest_name, weakest_score = pillars[0]
     if weakest_name == "Digital Hygiene" or screen_s < 50.0:
         recommendations.append({
@@ -235,7 +250,7 @@ def compute_lifestyle_assessment_results(data: AssessmentCreateRequest) -> Dict[
             "priority": "high",
             "title": "Enforce 60-Minute Digital Sunset",
             "description": "Late-night screen use suppresses melatonin production, delaying deep restorative sleep.",
-            "action_item": "Switch off laptop and smartphone screens 60 minutes before scheduled sleep time.",
+            "action_item": "Switch off laptop and smartphone screens 60 minutes before scheduled bedtime.",
         })
     elif weakest_name == "Sleep" or sleep_s < 55.0:
         recommendations.append({
@@ -287,6 +302,15 @@ def compute_lifestyle_assessment_results(data: AssessmentCreateRequest) -> Dict[
             "title": "Implement 2 PM Caffeine Curfew",
             "description": "Caffeine has a 5-7 hour biological half-life that degrades deep sleep architecture.",
             "action_item": "Avoid coffee, tea, and energy drinks after 2:00 PM.",
+        })
+
+    if data.screen_break_frequency == "rarely":
+        recommendations.append({
+            "category": "Screen",
+            "priority": "medium",
+            "title": "Adopt 20-20-20 Eye Strain Rule",
+            "description": "Continuous near-distance focusing causes ocular muscle strain and dryness.",
+            "action_item": "Every 20 minutes, look at an object 20 feet away for 20 seconds.",
         })
 
     if len(recommendations) < 3:
