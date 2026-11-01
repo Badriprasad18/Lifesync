@@ -202,3 +202,25 @@ export interface ClusterBenchmark {
   };
 }
 
+export interface ChatMessage {
+  id: string;
+  sender: 'user' | 'assistant';
+  text: string;
+  timestamp: string;
+  suggestions?: string[];
+  isError?: boolean;
+  engine?: string;
+}
+
+export interface ChatResponse {
+  reply: string;
+  suggestions: string[];
+  context_used: boolean;
+  engine: string;
+}
+
+export interface ChatFaq {
+  category: string;
+  question: string;
+  answer: string;
+}

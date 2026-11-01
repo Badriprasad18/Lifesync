@@ -11,6 +11,8 @@ import {
   ClusterBenchmark,
   Recommendation,
   RecommendationSummary,
+  ChatResponse,
+  ChatFaq,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
@@ -179,4 +181,22 @@ export const toggleRecommendation = async (id: number): Promise<{ id: number; is
   return response.data;
 };
 
+// AI Chatbot & Assistant
+export const sendChatMessage = async (
+  message: string,
+  history: Array<{ role: string; content: string }> = []
+): Promise<ChatResponse> => {
+  const response = await apiClient.post<ChatResponse>('/chat/message', {
+    message,
+    history,
+  });
+  return response.data;
+};
+
+export const fetchChatFaqs = async (): Promise<ChatFaq[]> => {
+  const response = await apiClient.get<{ faqs: ChatFaq[] }>('/chat/faq');
+  return response.data.faqs;
+};
+
 export default apiClient;
+

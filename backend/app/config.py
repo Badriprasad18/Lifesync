@@ -1,5 +1,5 @@
 """Application Configuration and Environment Settings."""
-from typing import List
+from typing import List, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
 import os
@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     DATABASE_URL: str = "sqlite:///./lifesync.db"
     ALLOWED_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
+    GEMINI_API_KEY: Optional[str] = None
+    OPENAI_API_KEY: Optional[str] = None
 
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"),

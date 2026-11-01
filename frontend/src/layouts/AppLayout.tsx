@@ -18,9 +18,11 @@ import {
   PlusCircle,
   ShieldCheck,
   Server,
+  Bot,
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { FloatingChatWidget } from '../components/common/FloatingChatWidget';
 
 interface NavItem {
   name: string;
@@ -35,6 +37,7 @@ const navItems: NavItem[] = [
   { name: 'Assessment Results', path: '/assessment/results', icon: Activity },
   { name: 'AI & ML Engine', path: '/ai-analysis', icon: BrainCircuit, badge: 'ML' },
   { name: 'Recommendations', path: '/recommendations', icon: Sparkles, badge: 'New' },
+  { name: 'AI Assistant', path: '/assistant', icon: Bot, badge: 'Live' },
   { name: 'Analytics & Trends', path: '/analytics', icon: TrendingUp },
   { name: 'Assessment History', path: '/history', icon: History },
   { name: 'User Profile', path: '/profile', icon: User },
@@ -263,6 +266,9 @@ export const AppLayout: React.FC = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* Real-Time Floating AI Chat Widget */}
+      <FloatingChatWidget />
     </div>
   );
 };

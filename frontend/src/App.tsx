@@ -17,6 +17,7 @@ import { AnalyticsPage } from './pages/AnalyticsPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { SettingsPage } from './pages/SettingsPage';
+import { ChatbotPage } from './pages/ChatbotPage';
 
 // Optional protected route wrapper
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -65,6 +66,7 @@ export function App() {
               <Route path="/assessment/results" element={<AssessmentResultsPage />} />
               <Route path="/ai-analysis" element={<AIAnalysisPage />} />
               <Route path="/recommendations" element={<RecommendationsPage />} />
+              <Route path="/assistant" element={<ChatbotPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/profile" element={<ProfilePage />} />

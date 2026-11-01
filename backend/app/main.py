@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import init_db
-from app.routers import health, auth, assessment, dashboard, recommendations
+from app.routers import health, auth, assessment, dashboard, recommendations, chatbot
 
 
 @asynccontextmanager
@@ -39,6 +39,8 @@ app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(assessment.router, prefix=settings.API_V1_STR)
 app.include_router(dashboard.router, prefix=settings.API_V1_STR)
 app.include_router(recommendations.router, prefix=settings.API_V1_STR)
+app.include_router(chatbot.router, prefix=settings.API_V1_STR)
+
 
 
 @app.get("/", tags=["Root"])
