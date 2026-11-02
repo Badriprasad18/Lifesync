@@ -1,5 +1,5 @@
 """Explainable Lifestyle Wellness Scoring Engine and Heuristic Analysis."""
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 from app.schemas.assessment import AssessmentCreateRequest
 
 

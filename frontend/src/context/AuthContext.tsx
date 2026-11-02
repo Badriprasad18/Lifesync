@@ -24,7 +24,7 @@ interface AuthContextType {
     occupation?: string;
   }) => Promise<void>;
   logout: () => void;
-  loginDemo: () => Promise<void>;
+  loginDemo: (customEmail?: string) => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -94,30 +94,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const loginDemo = async () => {
+  const loginDemo = async (customEmail?: string) => {
     setIsLoading(true);
     setError(null);
-    const demoCredentials = {
-      email: 'student_mca@college.edu',
-      password: 'StudentPassword123!',
-    };
+    const targetEmail = customEmail || 'badriprasaddash849@gmail.com';
     try {
-      // Try login first
-      const res = await loginUser(demoCredentials);
+      // Try targeted demo user first (or Badriprasad Dash)
+      const res = await loginUser({
+        email: targetEmail,
+        password: 'DemoPassword123!',
+      });
       setUser(res.user);
     } catch {
-      // If demo student doesn't exist yet, register it
       try {
-        const regRes = await registerUser({
-          ...demoCredentials,
-          full_name: 'Badriprasad Dash',
-          age: 23,
-          gender: 'male',
-          height_cm: 188.0,
-          weight_kg: 65.0,
-          occupation: 'MCA Student',
+        // Fallback to student_mca
+        const fallback = await loginUser({
+          email: 'student_mca@college.edu',
+          password: 'StudentPassword123!',
         });
-        setUser(regRes.user);
+        setUser(fallback.user);
       } catch (err: any) {
         const msg = err.response?.data?.detail || 'Could not initialize demo profile.';
         setError(msg);

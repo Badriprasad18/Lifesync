@@ -3,6 +3,7 @@ LifeSync AI - Synthetic Lifestyle Demonstration Dataset Generator
 Generates N=1,500 realistic, demographically calibrated lifestyle profiles
 representing four coherent behavioral archetypes plus multivariate statistical outliers.
 """
+from typing import Tuple
 import os
 from pathlib import Path
 import numpy as np

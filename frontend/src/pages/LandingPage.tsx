@@ -19,7 +19,7 @@ import { useAuth } from '../context/AuthContext';
 
 export const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
-  const { loginDemo } = useAuth();
+  const { isAuthenticated, loginDemo } = useAuth();
   const navigate = useNavigate();
 
   const handleLaunchDemo = async () => {
@@ -45,7 +45,7 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <button
             onClick={toggleTheme}
             className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -53,18 +53,29 @@ export const LandingPage: React.FC = () => {
           >
             {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
           </button>
-          <NavLink
-            to="/login"
-            className="text-xs font-semibold px-4 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            Sign In
-          </NavLink>
-          <button
-            onClick={handleLaunchDemo}
-            className="text-xs font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white shadow-md shadow-cyan-500/20 transition-all transform active:scale-95"
-          >
-            Launch Demo App
-          </button>
+          {isAuthenticated ? (
+            <NavLink
+              to="/dashboard"
+              className="text-xs font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white shadow-md shadow-cyan-500/20 transition-all"
+            >
+              Go to Dashboard
+            </NavLink>
+          ) : (
+            <>
+              <NavLink
+                to="/login"
+                className="text-xs font-semibold px-4 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                Sign In
+              </NavLink>
+              <button
+                onClick={handleLaunchDemo}
+                className="text-xs font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white shadow-md shadow-cyan-500/20 transition-all transform active:scale-95"
+              >
+                Launch Demo App
+              </button>
+            </>
+          )}
         </div>
       </header>
 
